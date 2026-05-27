@@ -20,10 +20,10 @@ jobs:
       contents: write
 
     env:
-      HOST: twoj-serwer.aternos.me
-      PORT: 25565
-      USERNAME: MojBot
-      COMMAND: "/login haslo"
+      HOST: ${{ secrets.HOST }}
+      SLOT: ${{ secrets.SLOT }}
+      USERNAME: ${{ secrets.USERNAME }}
+      COMMAND: ${{ secrets.COMMAND }}
 
     steps:
       - name: Checkout Repository
