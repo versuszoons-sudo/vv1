@@ -7,6 +7,11 @@ on:
     - cron: "0 */4 * * *"
   workflow_dispatch:
 
+# --- ZABEZPIECZENIE 1: BLOKADA KLONÓW ---
+concurrency:
+  group: "bot-afk"
+  cancel-in-progress: true
+
 jobs:
   run-bot:
     runs-on: ubuntu-latest
@@ -28,7 +33,21 @@ jobs:
         run: npm install mineflayer
 
       - name: Run
-        run: node index.js
+        # Jeśli używałeś wcześniej zmiennych środowiskowych (env: HOST, PORT itp.), 
+        # pamiętaj, aby je tu wkleić!
+        run: |
+          MAX_RESTARTS=100
+          COUNT=0
+          
+          # --- ZABEZPIECZENIE 2: LIMIT RESTARTÓW ---
+          while [ $COUNT -lt $MAX_RESTARTS ]; do
+            node index.js
+            COUNT=$((COUNT+1))
+            echo "Proces zakończony. Restart $COUNT z $MAX_RESTARTS za 10 sekund..."
+            sleep 30
+          done
+          
+          echo "Osiągnięto limit $MAX_RESTARTS restartów. Wyłączam bota."
 
       - name: Keep Workflow Active
         if: always()
