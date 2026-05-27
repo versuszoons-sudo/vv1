@@ -7,7 +7,6 @@ on:
     - cron: "0 */4 * * *"
   workflow_dispatch:
 
-# --- ZABEZPIECZENIE 1: BLOKADA KLONÓW ---
 concurrency:
   group: "bot-afk"
   cancel-in-progress: true
@@ -19,6 +18,12 @@ jobs:
 
     permissions:
       contents: write
+
+    env:
+      HOST: twoj-serwer.aternos.me
+      PORT: 25565
+      USERNAME: MojBot
+      COMMAND: "/login haslo"
 
     steps:
       - name: Checkout Repository
@@ -33,28 +38,29 @@ jobs:
         run: npm install mineflayer
 
       - name: Run
-        # Jeśli używałeś wcześniej zmiennych środowiskowych (env: HOST, PORT itp.), 
-        # pamiętaj, aby je tu wkleić!
         run: |
           MAX_RESTARTS=100
           COUNT=0
-          
-          # --- ZABEZPIECZENIE 2: LIMIT RESTARTÓW ---
+
           while [ $COUNT -lt $MAX_RESTARTS ]; do
+            echo "Uruchamianie bota..."
             node index.js
+
             COUNT=$((COUNT+1))
-            echo "Proces zakończony. Restart $COUNT z $MAX_RESTARTS za 10 sekund..."
+            echo "Restart $COUNT z $MAX_RESTARTS za 30 sekund..."
             sleep 30
           done
-          
-          echo "Osiągnięto limit $MAX_RESTARTS restartów. Wyłączam bota."
+
+          echo "Osiągnięto limit restartów."
 
       - name: Keep Workflow Active
         if: always()
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
           echo "Last run: $(date)" > keep_alive.txt
+
           git add keep_alive.txt
           git commit -m "Keep-alive: Workflow heart-beat" || exit 0
           git push
