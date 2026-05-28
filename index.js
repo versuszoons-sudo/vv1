@@ -32,11 +32,11 @@ function sleep(min, max) {
 const COMMAND = process.env.COMMAND;
 const SLOT = process.env.SLOT;
 
-let bot;
+let bot = null;
 
 function createBot() {
 
-  if (bot.connected){
+  if (bot){
     log.warn("Already connected");
     return;
   }
@@ -55,14 +55,12 @@ function createBot() {
   });
 
   bot.spawnCount = 0;
-  bot.connected = false;
 
   bot.once("login", async () => {
     log.info("Connected");
   });
 
   bot.once("spawn", async () => {
-    bot.connected = true;
     await sleep(3_000, 4_000);
     bot.chat(COMMAND);
     await sleep(3_000, 4_000);
@@ -104,9 +102,11 @@ function createBot() {
   });
 
   bot.on("end", (r) => {
-    bot.connected = false;
     log.warn(r + " Reconnecting...");
+    bot = null;
     await sleep(30_000, 60_000);
     createBot();
   });
 }
+
+createBot();
