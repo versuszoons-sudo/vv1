@@ -1,0 +1,33 @@
+name: Test
+
+on:
+  schedule:
+    - cron: "0 10 * * *"
+
+  workflow_dispatch:
+
+jobs:
+  run-minecraft-bot:
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 350
+
+    steps:
+      - name: Download repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: npm install mineflayer
+
+      - name: Run test
+        env:
+          SLOT: ${{ secrets.SLOT }}
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          COMMAND: ${{ secrets.COMMAND }}
+        run: node index.js
