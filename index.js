@@ -31,10 +31,16 @@ function sleep(min, max) {
 
 const COMMAND = process.env.COMMAND;
 const SLOT = process.env.SLOT;
-//
+
 let bot;
 
 function createBot() {
+
+  if (bot.connected){
+    log.warn("Already connected");
+    return;
+  }
+  
   log.info("Starting instance...");
 
   bot = mineflayer.createBot({
@@ -49,12 +55,14 @@ function createBot() {
   });
 
   bot.spawnCount = 0;
+  bot.connected = false;
 
   bot.once("login", async () => {
     log.info("Connected");
   });
 
   bot.once("spawn", async () => {
+    bot.connected = true;
     await sleep(3_000, 4_000);
     bot.chat(COMMAND);
     await sleep(3_000, 4_000);
@@ -96,9 +104,9 @@ function createBot() {
   });
 
   bot.on("end", (r) => {
+    bot.connected = false;
     log.warn(r + " Reconnecting...");
-    setTimeout(() => process.exit(1), 30_000);
+    await sleep(30_000, 60_000);
+    createBot();
   });
 }
-
-createBot();
